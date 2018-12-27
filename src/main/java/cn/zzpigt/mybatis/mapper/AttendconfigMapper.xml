@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zzpigt.mybatis.mapper.AttendconfigMapper" >
+  <resultMap id="BaseResultMap" type="cn.zzpigt.bean.Attendconfig" >
+    <id column="dutyType" property="dutytype" jdbcType="INTEGER" />
+    <result column="dutyName" property="dutyname" jdbcType="VARCHAR" />
+    <result column="general" property="general" jdbcType="VARCHAR" />
+    <result column="dutyTime1" property="dutytime1" jdbcType="VARCHAR" />
+    <result column="dutyTime2" property="dutytime2" jdbcType="VARCHAR" />
+    <result column="dutyTime3" property="dutytime3" jdbcType="VARCHAR" />
+    <result column="dutyTime4" property="dutytime4" jdbcType="VARCHAR" />
+    <result column="dutyTime5" property="dutytime5" jdbcType="VARCHAR" />
+    <result column="dutyTime6" property="dutytime6" jdbcType="VARCHAR" />
+    <result column="dutyType1" property="dutytype1" jdbcType="VARCHAR" />
+    <result column="dutyType2" property="dutytype2" jdbcType="VARCHAR" />
+    <result column="dutyType3" property="dutytype3" jdbcType="VARCHAR" />
+    <result column="dutyType4" property="dutytype4" jdbcType="VARCHAR" />
+    <result column="dutyType5" property="dutytype5" jdbcType="VARCHAR" />
+    <result column="dutyType6" property="dutytype6" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    dutyType, dutyName, general, dutyTime1, dutyTime2, dutyTime3, dutyTime4, dutyTime5, 
+    dutyTime6, dutyType1, dutyType2, dutyType3, dutyType4, dutyType5, dutyType6
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.zzpigt.bean.AttendconfigExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from attendconfig
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from attendconfig
+    where dutyType = #{dutytype,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from attendconfig
+    where dutyType = #{dutytype,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.zzpigt.bean.AttendconfigExample" >
+    delete from attendconfig
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.zzpigt.bean.Attendconfig" >
+    insert into attendconfig (dutyType, dutyName, general, 
+      dutyTime1, dutyTime2, dutyTime3, 
+      dutyTime4, dutyTime5, dutyTime6, 
+      dutyType1, dutyType2, dutyType3, 
+      dutyType4, dutyType5, dutyType6
+      )
+    values (#{dutytype,jdbcType=INTEGER}, #{dutyname,jdbcType=VARCHAR}, #{general,jdbcType=VARCHAR}, 
+      #{dutytime1,jdbcType=VARCHAR}, #{dutytime2,jdbcType=VARCHAR}, #{dutytime3,jdbcType=VARCHAR}, 
+      #{dutytime4,jdbcType=VARCHAR}, #{dutytime5,jdbcType=VARCHAR}, #{dutytime6,jdbcType=VARCHAR}, 
+      #{dutytype1,jdbcType=VARCHAR}, #{dutytype2,jdbcType=VARCHAR}, #{dutytype3,jdbcType=VARCHAR}, 
+      #{dutytype4,jdbcType=VARCHAR}, #{dutytype5,jdbcType=VARCHAR}, #{dutytype6,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.zzpigt.bean.Attendconfig" >
+    insert into attendconfig
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="dutytype != null" >
+        dutyType,
+      </if>
+      <if test="dutyname != null" >
+        dutyName,
+      </if>
+      <if test="general != null" >
+        general,
+      </if>
+      <if test="dutytime1 != null" >
+        dutyTime1,
+      </if>
+      <if test="dutytime2 != null" >
+        dutyTime2,
+      </if>
+      <if test="dutytime3 != null" >
+        dutyTime3,
+      </if>
+      <if test="dutytime4 != null" >
+        dutyTime4,
+      </if>
+      <if test="dutytime5 != null" >
+        dutyTime5,
+      </if>
+      <if test="dutytime6 != null" >
+        dutyTime6,
+      </if>
+      <if test="dutytype1 != null" >
+        dutyType1,
+      </if>
+      <if test="dutytype2 != null" >
+        dutyType2,
+      </if>
+      <if test="dutytype3 != null" >
+        dutyType3,
+      </if>
+      <if test="dutytype4 != null" >
+        dutyType4,
+      </if>
+      <if test="dutytype5 != null" >
+        dutyType5,
+      </if>
+      <if test="dutytype6 != null" >
+        dutyType6,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="dutytype != null" >
+        #{dutytype,jdbcType=INTEGER},
+      </if>
+      <if test="dutyname != null" >
+        #{dutyname,jdbcType=VARCHAR},
+      </if>
+      <if test="general != null" >
+        #{general,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime1 != null" >
+        #{dutytime1,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime2 != null" >
+        #{dutytime2,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime3 != null" >
+        #{dutytime3,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime4 != null" >
+        #{dutytime4,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime5 != null" >
+        #{dutytime5,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime6 != null" >
+        #{dutytime6,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype1 != null" >
+        #{dutytype1,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype2 != null" >
+        #{dutytype2,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype3 != null" >
+        #{dutytype3,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype4 != null" >
+        #{dutytype4,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype5 != null" >
+        #{dutytype5,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype6 != null" >
+        #{dutytype6,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.zzpigt.bean.AttendconfigExample" resultType="java.lang.Integer" >
+    select count(*) from attendconfig
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update attendconfig
+    <set >
+      <if test="record.dutytype != null" >
+        dutyType = #{record.dutytype,jdbcType=INTEGER},
+      </if>
+      <if test="record.dutyname != null" >
+        dutyName = #{record.dutyname,jdbcType=VARCHAR},
+      </if>
+      <if test="record.general != null" >
+        general = #{record.general,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime1 != null" >
+        dutyTime1 = #{record.dutytime1,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime2 != null" >
+        dutyTime2 = #{record.dutytime2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime3 != null" >
+        dutyTime3 = #{record.dutytime3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime4 != null" >
+        dutyTime4 = #{record.dutytime4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime5 != null" >
+        dutyTime5 = #{record.dutytime5,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytime6 != null" >
+        dutyTime6 = #{record.dutytime6,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype1 != null" >
+        dutyType1 = #{record.dutytype1,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype2 != null" >
+        dutyType2 = #{record.dutytype2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype3 != null" >
+        dutyType3 = #{record.dutytype3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype4 != null" >
+        dutyType4 = #{record.dutytype4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype5 != null" >
+        dutyType5 = #{record.dutytype5,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutytype6 != null" >
+        dutyType6 = #{record.dutytype6,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update attendconfig
+    set dutyType = #{record.dutytype,jdbcType=INTEGER},
+      dutyName = #{record.dutyname,jdbcType=VARCHAR},
+      general = #{record.general,jdbcType=VARCHAR},
+      dutyTime1 = #{record.dutytime1,jdbcType=VARCHAR},
+      dutyTime2 = #{record.dutytime2,jdbcType=VARCHAR},
+      dutyTime3 = #{record.dutytime3,jdbcType=VARCHAR},
+      dutyTime4 = #{record.dutytime4,jdbcType=VARCHAR},
+      dutyTime5 = #{record.dutytime5,jdbcType=VARCHAR},
+      dutyTime6 = #{record.dutytime6,jdbcType=VARCHAR},
+      dutyType1 = #{record.dutytype1,jdbcType=VARCHAR},
+      dutyType2 = #{record.dutytype2,jdbcType=VARCHAR},
+      dutyType3 = #{record.dutytype3,jdbcType=VARCHAR},
+      dutyType4 = #{record.dutytype4,jdbcType=VARCHAR},
+      dutyType5 = #{record.dutytype5,jdbcType=VARCHAR},
+      dutyType6 = #{record.dutytype6,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.zzpigt.bean.Attendconfig" >
+    update attendconfig
+    <set >
+      <if test="dutyname != null" >
+        dutyName = #{dutyname,jdbcType=VARCHAR},
+      </if>
+      <if test="general != null" >
+        general = #{general,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime1 != null" >
+        dutyTime1 = #{dutytime1,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime2 != null" >
+        dutyTime2 = #{dutytime2,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime3 != null" >
+        dutyTime3 = #{dutytime3,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime4 != null" >
+        dutyTime4 = #{dutytime4,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime5 != null" >
+        dutyTime5 = #{dutytime5,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytime6 != null" >
+        dutyTime6 = #{dutytime6,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype1 != null" >
+        dutyType1 = #{dutytype1,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype2 != null" >
+        dutyType2 = #{dutytype2,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype3 != null" >
+        dutyType3 = #{dutytype3,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype4 != null" >
+        dutyType4 = #{dutytype4,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype5 != null" >
+        dutyType5 = #{dutytype5,jdbcType=VARCHAR},
+      </if>
+      <if test="dutytype6 != null" >
+        dutyType6 = #{dutytype6,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where dutyType = #{dutytype,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.zzpigt.bean.Attendconfig" >
+    update attendconfig
+    set dutyName = #{dutyname,jdbcType=VARCHAR},
+      general = #{general,jdbcType=VARCHAR},
+      dutyTime1 = #{dutytime1,jdbcType=VARCHAR},
+      dutyTime2 = #{dutytime2,jdbcType=VARCHAR},
+      dutyTime3 = #{dutytime3,jdbcType=VARCHAR},
+      dutyTime4 = #{dutytime4,jdbcType=VARCHAR},
+      dutyTime5 = #{dutytime5,jdbcType=VARCHAR},
+      dutyTime6 = #{dutytime6,jdbcType=VARCHAR},
+      dutyType1 = #{dutytype1,jdbcType=VARCHAR},
+      dutyType2 = #{dutytype2,jdbcType=VARCHAR},
+      dutyType3 = #{dutytype3,jdbcType=VARCHAR},
+      dutyType4 = #{dutytype4,jdbcType=VARCHAR},
+      dutyType5 = #{dutytype5,jdbcType=VARCHAR},
+      dutyType6 = #{dutytype6,jdbcType=VARCHAR}
+    where dutyType = #{dutytype,jdbcType=INTEGER}
+  </update>
+</mapper>

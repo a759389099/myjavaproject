@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.zzpigt.mybatis.mapper.AffairchainMapper" >
+  <resultMap id="BaseResultMap" type="cn.zzpigt.bean.Affairchain" >
+    <id column="affairChainId" property="affairchainid" jdbcType="INTEGER" />
+    <result column="affairId" property="affairid" jdbcType="INTEGER" />
+    <result column="userId" property="userid" jdbcType="INTEGER" />
+    <result column="affairChainOrder" property="affairchainorder" jdbcType="TINYINT" />
+    <result column="affairChainTime" property="affairchaintime" jdbcType="TIMESTAMP" />
+    <result column="affairChainRemark" property="affairchainremark" jdbcType="VARCHAR" />
+    <result column="affairChainState" property="affairchainstate" jdbcType="TINYINT" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    affairChainId, affairId, userId, affairChainOrder, affairChainTime, affairChainRemark, 
+    affairChainState
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.zzpigt.bean.AffairchainExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from affairchain
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from affairchain
+    where affairChainId = #{affairchainid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from affairchain
+    where affairChainId = #{affairchainid,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.zzpigt.bean.AffairchainExample" >
+    delete from affairchain
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.zzpigt.bean.Affairchain" >
+    insert into affairchain (affairChainId, affairId, userId, 
+      affairChainOrder, affairChainTime, affairChainRemark, 
+      affairChainState)
+    values (#{affairchainid,jdbcType=INTEGER}, #{affairid,jdbcType=INTEGER}, #{userid,jdbcType=INTEGER}, 
+      #{affairchainorder,jdbcType=TINYINT}, #{affairchaintime,jdbcType=TIMESTAMP}, #{affairchainremark,jdbcType=VARCHAR}, 
+      #{affairchainstate,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.zzpigt.bean.Affairchain" >
+    insert into affairchain
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="affairchainid != null" >
+        affairChainId,
+      </if>
+      <if test="affairid != null" >
+        affairId,
+      </if>
+      <if test="userid != null" >
+        userId,
+      </if>
+      <if test="affairchainorder != null" >
+        affairChainOrder,
+      </if>
+      <if test="affairchaintime != null" >
+        affairChainTime,
+      </if>
+      <if test="affairchainremark != null" >
+        affairChainRemark,
+      </if>
+      <if test="affairchainstate != null" >
+        affairChainState,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="affairchainid != null" >
+        #{affairchainid,jdbcType=INTEGER},
+      </if>
+      <if test="affairid != null" >
+        #{affairid,jdbcType=INTEGER},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="affairchainorder != null" >
+        #{affairchainorder,jdbcType=TINYINT},
+      </if>
+      <if test="affairchaintime != null" >
+        #{affairchaintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="affairchainremark != null" >
+        #{affairchainremark,jdbcType=VARCHAR},
+      </if>
+      <if test="affairchainstate != null" >
+        #{affairchainstate,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.zzpigt.bean.AffairchainExample" resultType="java.lang.Integer" >
+    select count(*) from affairchain
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update affairchain
+    <set >
+      <if test="record.affairchainid != null" >
+        affairChainId = #{record.affairchainid,jdbcType=INTEGER},
+      </if>
+      <if test="record.affairid != null" >
+        affairId = #{record.affairid,jdbcType=INTEGER},
+      </if>
+      <if test="record.userid != null" >
+        userId = #{record.userid,jdbcType=INTEGER},
+      </if>
+      <if test="record.affairchainorder != null" >
+        affairChainOrder = #{record.affairchainorder,jdbcType=TINYINT},
+      </if>
+      <if test="record.affairchaintime != null" >
+        affairChainTime = #{record.affairchaintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.affairchainremark != null" >
+        affairChainRemark = #{record.affairchainremark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.affairchainstate != null" >
+        affairChainState = #{record.affairchainstate,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update affairchain
+    set affairChainId = #{record.affairchainid,jdbcType=INTEGER},
+      affairId = #{record.affairid,jdbcType=INTEGER},
+      userId = #{record.userid,jdbcType=INTEGER},
+      affairChainOrder = #{record.affairchainorder,jdbcType=TINYINT},
+      affairChainTime = #{record.affairchaintime,jdbcType=TIMESTAMP},
+      affairChainRemark = #{record.affairchainremark,jdbcType=VARCHAR},
+      affairChainState = #{record.affairchainstate,jdbcType=TINYINT}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.zzpigt.bean.Affairchain" >
+    update affairchain
+    <set >
+      <if test="affairid != null" >
+        affairId = #{affairid,jdbcType=INTEGER},
+      </if>
+      <if test="userid != null" >
+        userId = #{userid,jdbcType=INTEGER},
+      </if>
+      <if test="affairchainorder != null" >
+        affairChainOrder = #{affairchainorder,jdbcType=TINYINT},
+      </if>
+      <if test="affairchaintime != null" >
+        affairChainTime = #{affairchaintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="affairchainremark != null" >
+        affairChainRemark = #{affairchainremark,jdbcType=VARCHAR},
+      </if>
+      <if test="affairchainstate != null" >
+        affairChainState = #{affairchainstate,jdbcType=TINYINT},
+      </if>
+    </set>
+    where affairChainId = #{affairchainid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.zzpigt.bean.Affairchain" >
+    update affairchain
+    set affairId = #{affairid,jdbcType=INTEGER},
+      userId = #{userid,jdbcType=INTEGER},
+      affairChainOrder = #{affairchainorder,jdbcType=TINYINT},
+      affairChainTime = #{affairchaintime,jdbcType=TIMESTAMP},
+      affairChainRemark = #{affairchainremark,jdbcType=VARCHAR},
+      affairChainState = #{affairchainstate,jdbcType=TINYINT}
+    where affairChainId = #{affairchainid,jdbcType=INTEGER}
+  </update>
+</mapper>
