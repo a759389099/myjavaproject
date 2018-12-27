@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!-- 创建连接池 -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:dbconfig.properties</value>
+		</property>
+	</bean>
+	<bean id="dataSource" destroy-method="close"
+		class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.uname}" />
+		<property name="password" value="${jdbc.upwd}" />
+	</bean>
+	<!-- 配置session工厂 -->
+	<bean name="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:SqlMapConfig.xml"></property>
+	</bean>
+	
+	
+	<!-- mapper扫描式开发 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.wowowo.mapper"></property>
+	</bean>
+	
+
+	<!-- Spring Aop事务操作 ,以下暂时还没用到-->
+	<!-- 事务核心管理器, 操作事务全靠这个对象, 必须配置 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 配置事务通知  
+		属性介绍
+		name : service中的方法名
+		rollback-for : 发生何种异常回滚
+		read-only : 是否只读(建议查询的方法设置为true)
+		isolation : 事务隔离级别 (建议听架构师的)
+		propagation : 事务传播行为 , 无脑选择 REQUIRED
+	-->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="insert*" rollback-for="java.lang.Exception" read-only="false" isolation="READ_UNCOMMITTED" propagation="REQUIRED" />
+			<tx:method name="delete*" rollback-for="java.lang.Exception" read-only="false" isolation="READ_UNCOMMITTED" propagation="REQUIRED" />
+			<tx:method name="update*" rollback-for="java.lang.Exception" read-only="false" isolation="READ_UNCOMMITTED" propagation="REQUIRED" />
+			<tx:method name="select*" rollback-for="java.lang.Exception" read-only="true" isolation="READ_COMMITTED" propagation="REQUIRED" />
+			<tx:method name="tranMoney" rollback-for="java.lang.Exception" read-only="false" isolation="READ_UNCOMMITTED" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+
+
+	<!-- 配置织入 -->
+	<aop:config>
+		<aop:pointcut id="pc"
+			expression="execution(* com.wowowo.service..*ServiceImpl.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pc" />
+	</aop:config>
+
+
+</beans>
