@@ -15,7 +15,7 @@ public interface AttendService {
 
 	UserAttendVo getAttend(HttpSession session);
 
-	void sign(HttpSession session) throws Exception;
+	void sign(HttpSession session, String type) throws Exception;
 
 	List<AttendconfigVo> getAttendConfig(HttpSession session);
 

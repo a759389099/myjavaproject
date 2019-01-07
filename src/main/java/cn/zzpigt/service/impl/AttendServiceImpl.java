@@ -101,13 +101,14 @@ public class AttendServiceImpl implements AttendService {
 	}
 
 	@Override
-	public void sign(HttpSession session) throws Exception {
+	public void sign(HttpSession session, String type) throws Exception {
 		// 周末周日排除
 		Date currentDate = new Date();
 		SimpleDateFormat day = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat hour = new SimpleDateFormat("HH:mm:ss");
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(currentDate);
+		// 这里取消判断，根据attendconfig表数据库general字段判断休息日
 		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
 			throw new Exception("周末周日也来打卡?");
 		}
@@ -119,7 +120,7 @@ public class AttendServiceImpl implements AttendService {
 		uaCriteria.andUseridEqualTo(user.getUserid());
 		// 联合主键,虽然是一对一,但是不能用查主键的方式
 		List<UserAttend> userattendList = uam.selectByExample(userAttendExample);
-		// 检查班次是否存在，没有说明，没有该用户的排班
+		// 检查班次是否存在，没有说明，没有该用户的排班,前端已做处理
 		if (userattendList == null || userattendList.size() == 0) {
 			System.out.println("没有该用户的排班");
 			throw new Exception("没有该用户的排班");
@@ -130,6 +131,7 @@ public class AttendServiceImpl implements AttendService {
 		adCriteria.andUseridEqualTo(user.getUserid());
 		List<Attendduty> attenddutyList = adm.selectByExample(attenddutyExample);
 		// 签到表没有该用户的数据，说明是第一次签到
+		// 这里需要判断是什么班次类型！！！！！！！！
 		if (attenddutyList == null || attenddutyList.size() == 0) {
 			System.out.println("签到表没有该用户的数据，说明是第一次签到");
 			// 获取对应的排班表
@@ -163,6 +165,8 @@ public class AttendServiceImpl implements AttendService {
 			attendduty.setRegistertype("1");
 			adm.insertSelective(attendduty);
 		}
+
+		// 之前有打卡记录
 		AttenddutyExample AttenddutyExample = new AttenddutyExample();
 		cn.zzpigt.bean.AttenddutyExample.Criteria createCriteria = AttenddutyExample.createCriteria();
 		createCriteria.andUseridEqualTo(user.getUserid());
@@ -417,7 +421,7 @@ public class AttendServiceImpl implements AttendService {
 		List<AttendconfigVo> list = new ArrayList<>();
 		String[] split = config.getGeneral().split(",");
 
-		// 本月第一天
+		// 本月第一天，当时获取一个月所有的天就是拿不到第一天啊啊啊啊啊啊
 		if (calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[0]) + 1
 				&& calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[1]) + 1) {
 			AttendconfigVo attendconfigVo = new AttendconfigVo(config);
@@ -470,11 +474,12 @@ public class AttendServiceImpl implements AttendService {
 		cn.zzpigt.bean.UserExample.Criteria userCriteria = uExample.createCriteria();
 		userCriteria.andLeaderidEqualTo(user.getUserid());
 		List<User> flist = um.selectByExample(uExample);
-		if (flist.size() > 0)
+		if (flist.size() > 0) {
 			for (User follower : flist) {
 				List<User> followers = getFollowers(follower);
 				ulist.addAll(followers);
 			}
+		}
 
 		return ulist;
 	}
@@ -574,16 +579,16 @@ public class AttendServiceImpl implements AttendService {
 			if (attendday > 0) {
 				// 行政班
 				if (userAttendList.get(0).getDutytype() == 1) {
-					int m1=getSignCount(user2,date,"1");
-					int m2=getSignCount(user2,date,"2");
-					noCome = attendday   - m1 ;
-					noBack = attendday   - m2 ;
+					int m1 = getSignCount(user2, date, "1");
+					int m2 = getSignCount(user2, date, "2");
+					noCome = attendday - m1;
+					noBack = attendday - m2;
 					// 两头班
 				} else {
-					int m1=getSignCount(user2,date,"1");
-					int m2=getSignCount(user2,date,"2");
-					int m3=getSignCount(user2,date,"3");
-					int m4=getSignCount(user2,date,"4");
+					int m1 = getSignCount(user2, date, "1");
+					int m2 = getSignCount(user2, date, "2");
+					int m3 = getSignCount(user2, date, "3");
+					int m4 = getSignCount(user2, date, "4");
 					noCome = attendday * 2 - m1 - m3;
 					noBack = attendday * 2 - m2 - m4;
 				}
@@ -601,14 +606,14 @@ public class AttendServiceImpl implements AttendService {
 		}
 		return uacvl;
 	}
-	private int getSignCount(User user2,String date,String state){
-		//获取打卡次数
+
+	private int getSignCount(User user2, String date, String state) {
+		// 获取打卡次数
 		AttenddutyExample adExample = new AttenddutyExample();
 		cn.zzpigt.bean.AttenddutyExample.Criteria adCriteria = adExample.createCriteria();
 		adCriteria.andUseridEqualTo(user2.getUserid());
 		adCriteria.andRegistertypeEqualTo(state);
-		adCriteria.andRegistertimeBetween(DateUtil.getStartTimeOfMonth(date),
-				DateUtil.getEndTimeOfMonth(date));
+		adCriteria.andRegistertimeBetween(DateUtil.getStartTimeOfMonth(date), DateUtil.getEndTimeOfMonth(date));
 		return adm.countByExample(adExample);
 	}
 
