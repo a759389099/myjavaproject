@@ -95,4 +95,12 @@ public class SaleVisitVo {
     public void setVisitNexttime(Date visitNexttime) {
         this.visitNexttime = visitNexttime;
     }
+
+	@Override
+	public String toString() {
+		return "SaleVisitVo [visitId=" + visitId + ", customer=" + customer + ", user=" + user + ", visitTime="
+				+ visitTime + ", visitInterviewee=" + visitInterviewee + ", visitAddr=" + visitAddr + ", visitDetail="
+				+ visitDetail + ", visitNexttime=" + visitNexttime + "]";
+	}
+    
 }

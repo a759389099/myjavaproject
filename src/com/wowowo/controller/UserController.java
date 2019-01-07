@@ -87,7 +87,9 @@ public class UserController {
 	}
 	@RequestMapping("/toEdit.action")
 	public String toEdit(Long userId,Model model){
+		//获取用户角色对象
 		SysUserVo uservo=us.selectByUserId(userId);
+		//获取所有的角色列表
 		List<SysRole> list=srs.getRoleList2();
 		model.addAttribute("user",uservo);
 		model.addAttribute("allRole", list);

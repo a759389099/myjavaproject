@@ -82,4 +82,12 @@ public class SaleVisit {
     public void setVisitNexttime(Date visitNexttime) {
         this.visitNexttime = visitNexttime;
     }
+
+	@Override
+	public String toString() {
+		return "SaleVisit [visitId=" + visitId + ", visitCustId=" + visitCustId + ", visitUserId=" + visitUserId
+				+ ", visitTime=" + visitTime + ", visitInterviewee=" + visitInterviewee + ", visitAddr=" + visitAddr
+				+ ", visitDetail=" + visitDetail + ", visitNexttime=" + visitNexttime + "]";
+	}
+    
 }

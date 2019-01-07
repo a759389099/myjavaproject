@@ -101,14 +101,16 @@ public class UserServiceImpl implements UserService {
 		example.setLen(pageBean.getPageSize());
 		List<SysUser> userList = sm.selectByExample(example);
 		List<SysUserVo> vo=new ArrayList<>();
+		//遍历用户对象
 		for (SysUser sysUser : userList) {
 			SysUserRoleExample sure = new SysUserRoleExample();
 			com.wowowo.bean.SysUserRoleExample.Criteria urcriteria = sure.createCriteria();
 			urcriteria.andUserIdEqualTo(sysUser.getUserId());
+			//获取用户角色对象
 			List<SysUserRoleKey> userRoleList = surm.selectByExample(sure);
 			SysUserVo sysUserVo = new SysUserVo(sysUser);
 			List<SysRole> roleList= new ArrayList<>();
-			
+			//po转vo，把角色列表放到vo对象中
 			for (SysUserRoleKey sysUserRoleKey : userRoleList) {
 				SysRole SysRole = srm.selectByPrimaryKey(sysUserRoleKey.getRoleId());
 				roleList.add(SysRole);
@@ -124,15 +126,17 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public SysUserVo selectByUserId(Long userId) {
-		
+		//获取用户对象
 		SysUser user = sm.selectByPrimaryKey(userId);
 		SysUserRoleExample sure = new SysUserRoleExample();
 		com.wowowo.bean.SysUserRoleExample.Criteria urcriteria = sure.createCriteria();
 		urcriteria.andUserIdEqualTo(user.getUserId());
+		//根据用户id查询用户角色列表
 		List<SysUserRoleKey> userRoleList = surm.selectByExample(sure);
+		//构造vo对象
 		SysUserVo sysUserVo = new SysUserVo(user);
 		List<SysRole> roleList= new ArrayList<>();
-		
+		//po转vo，遍历用户角色列表，根据角色id获取角色信息，放到vo的list中
 		for (SysUserRoleKey sysUserRoleKey : userRoleList) {
 			SysRole SysRole = srm.selectByPrimaryKey(sysUserRoleKey.getRoleId());
 			roleList.add(SysRole);
@@ -146,12 +150,12 @@ public class UserServiceImpl implements UserService {
 	public void updateUser(QueryVo qvo) {
 		System.out.println(qvo);
 		Long userId = qvo.getUser().getUserId();
-		//删除所有
+		//删除该用户所有角色
 		SysUserRoleExample example = new SysUserRoleExample();
 		com.wowowo.bean.SysUserRoleExample.Criteria criteria = example.createCriteria();
 		criteria.andUserIdEqualTo(userId);
 		surm.deleteByExample(example);
-		//插入选中的
+		//插入选中的角色id,这里用户所属的角色id是长整型数组，如果是list的话，springmvc不太好接收
 		Long[] rId = qvo.getrId();
 		if(rId!=null){
 			for (Long long1 : rId) {
@@ -159,7 +163,7 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		//更新user
+		//更新user，除了角色以外，别的信息
 		sm.updateByPrimaryKeySelective(qvo.getUser());
 		
 	}

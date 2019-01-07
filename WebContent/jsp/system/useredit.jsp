@@ -69,6 +69,7 @@
 							<tr>
 							<td>
 							用户角色:
+							<!-- 遍历所有角色列表，如果列表中的角色id和该用户所属角色id一致，那么多选框选中-->
 							<c:forEach items="${allRole}" var="role"> 
 							<input type="checkbox"
 								<c:forEach items="${user.roleList}" var="myrole" >
