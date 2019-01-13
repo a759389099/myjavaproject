@@ -1,5 +1,6 @@
 package cn.zzpigt.service.impl;
 
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,20 +62,22 @@ public class AttendServiceImpl implements AttendService {
 		UserAttendExample userAttendExample = new UserAttendExample();
 		Criteria uaCriteria = userAttendExample.createCriteria();
 		uaCriteria.andUseridEqualTo(user.getUserid());
+		//获取用户排版表
 		List<UserAttend> userattendList = uam.selectByExample(userAttendExample);
 		if (userattendList == null || userattendList.size() == 0) {
 			return null;
 		}
 		UserAttend userAttend = userattendList.get(0);
-		//
+		//获取该用户的具体班次信息
 		Attendconfig attendConfig = acm.selectByPrimaryKey(userAttend.getDutytype());
 		userAttendVo.setDutytype(attendConfig);
 
 		AttenddutyExample attenddutyExample = new AttenddutyExample();
 		cn.zzpigt.bean.AttenddutyExample.Criteria adCriteria = attenddutyExample.createCriteria();
 		adCriteria.andUseridEqualTo(user.getUserid());
+		//获取用户所有的打卡记录
 		List<Attendduty> attenddutyList = adm.selectByExample(attenddutyExample);
-		// 获取今天的排班信息
+		// 获取今天的打卡记录
 		List<Attendduty> myList = new ArrayList<>();
 		for (Attendduty attendduty : attenddutyList) {
 
@@ -104,15 +107,7 @@ public class AttendServiceImpl implements AttendService {
 	public void sign(HttpSession session, String type) throws Exception {
 		// 周末周日排除
 		Date currentDate = new Date();
-		SimpleDateFormat day = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat hour = new SimpleDateFormat("HH:mm:ss");
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(currentDate);
-		// 这里取消判断，根据attendconfig表数据库general字段判断休息日
-		if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-			throw new Exception("周末周日也来打卡?");
-		}
-
 		// 用id查班次类型
 		User user = (User) session.getAttribute("user");
 		UserAttendExample userAttendExample = new UserAttendExample();
@@ -125,263 +120,57 @@ public class AttendServiceImpl implements AttendService {
 			System.out.println("没有该用户的排班");
 			throw new Exception("没有该用户的排班");
 		}
+
 		// 根据id拿到签到表
 		AttenddutyExample attenddutyExample = new AttenddutyExample();
 		cn.zzpigt.bean.AttenddutyExample.Criteria adCriteria = attenddutyExample.createCriteria();
 		adCriteria.andUseridEqualTo(user.getUserid());
-		List<Attendduty> attenddutyList = adm.selectByExample(attenddutyExample);
-		// 签到表没有该用户的数据，说明是第一次签到
-		// 这里需要判断是什么班次类型！！！！！！！！
-		if (attenddutyList == null || attenddutyList.size() == 0) {
-			System.out.println("签到表没有该用户的数据，说明是第一次签到");
-			// 获取对应的排班表
-			Attendconfig attendconfig = acm.selectByPrimaryKey(userattendList.get(0).getDutytype());
-			//
-			String sdfFormat = hour.format(currentDate);
-			String format = sdfFormat.replace(":", "");
-			int time1 = Integer.parseInt(format);
-			String dutytime1 = attendconfig.getDutytime1().replace(":", "");
-			int time2 = Integer.parseInt(dutytime1);
-			Attendduty attendduty = new Attendduty();
-			// 没迟到
-			if (time1 < time2 && time1 > time2 - 10000) {
-
+		Integer userattend = userattendList.get(0).getDutytype();
+		Attendconfig attendconfig = acm.selectByPrimaryKey(userattend);
+		String[] split = attendconfig.getGeneral().split(",");
+		// 根据attendconfig表数据库general字段判断休息日
+		Calendar today = Calendar.getInstance();
+		today.setTime(currentDate);
+		for (int i = 0; i < split.length; i++) {
+			if (today.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[i]) + 1) {
+				throw new Exception("本日为假期！");
 			}
-			// 迟到的情况
-			else if (time1 > time2 && time1 < time2 + 10000) {
+		}
+		//反射调用set方法 datetime1，2，3，4
+		Method method = attendconfig.getClass().getDeclaredMethod("getDutytime" + type);
+		String dutyTime = (String) method.invoke(attendconfig);
+		Attendduty attendduty = new Attendduty();
+		// 要求时间
+		String todayString = hour.format(currentDate);
+		int intduty = Integer.parseInt(dutyTime.replace(":", ""));
+		int intcurrent = Integer.parseInt(todayString.replace(":", ""));
+		System.out.println(intduty);
+		System.out.println(intcurrent);
+		System.out.println(intduty + 10000);
+		// 上班
+		if (type.equals("1") || type.equals("3")) {
+			if (intduty + 10000 > intcurrent && intduty < intcurrent) {
+				System.out.println("迟到");
 				attendduty.setRemark("迟到");
 			}
-			// 非正常时间打卡
-			else {
-
-				System.out.println("非正常时间打卡");
-				throw new Exception("非正常时间打卡");
-			}
-			// 插入数据!
-
-			attendduty.setDutytype(userattendList.get(0).getDutytype());
-			attendduty.setRegistertime(currentDate);
-			attendduty.setUserid(user.getUserid());
-			attendduty.setRegistertype("1");
-			adm.insertSelective(attendduty);
 		}
-
-		// 之前有打卡记录
-		AttenddutyExample AttenddutyExample = new AttenddutyExample();
-		cn.zzpigt.bean.AttenddutyExample.Criteria createCriteria = AttenddutyExample.createCriteria();
-		createCriteria.andUseridEqualTo(user.getUserid());
-		List<Attendduty> list = adm.selectByExample(AttenddutyExample);
-		List<Attendduty> myList = new ArrayList<>();
-		// myList里面的就是用户今天的打卡数据
-		for (Attendduty attendduty : list) {
-			Date registertime = attendduty.getRegistertime();
-			if (day.format(registertime).equals(day.format(currentDate))) {
-				myList.add(attendduty);
+		// 下班
+		else if (type.equals("2") || type.equals("4")) {
+			if (intduty - 10000 > intcurrent && intduty > intcurrent) {
+				System.out.println("早退");
+				attendduty.setRemark("早退");
 			}
+		} else {
+			throw new Exception("打卡类型异常");
 		}
-
-		// 区分行政班还是两头班
-		if (userattendList.get(0).getDutytype() == 1) {
-			Attendconfig attendconfig = acm.selectByPrimaryKey(userattendList.get(0).getDutytype());
-			int size = myList.size();
-			System.out.println("行政班获取实际打卡次数" + size);
-			switch (size) {
-			case 0:
-				System.out.println("行政班的case0，也就是上班打卡");
-				// 获取对应的排班表
-				String sdfFormat = hour.format(currentDate);
-				String format = sdfFormat.replace(":", "");
-				int time1 = Integer.parseInt(format);
-				String dutytime1 = attendconfig.getDutytime1().replace(":", "");
-				int time2 = Integer.parseInt(dutytime1);
-				Attendduty attendduty = new Attendduty();
-				// 没迟到
-				if (time1 < time2 && time1 > time2 - 10000) {
-
-				}
-				// 迟到的情况
-				else if (time1 > time2 && time1 < time2 + 10000) {
-					attendduty.setRemark("迟到");
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("1");
-				adm.insertSelective(attendduty);
-
-				break;
-
-			case 1:
-				System.out.println("行政班的case1，也就是下班打卡");
-				// 获取对应的排班表
-				sdfFormat = hour.format(currentDate);
-				format = sdfFormat.replace(":", "");
-				time1 = Integer.parseInt(format);
-				String dutytime2 = attendconfig.getDutytime2().replace(":", "");
-				time2 = Integer.parseInt(dutytime2);
-				attendduty = new Attendduty();
-				// 下班
-				// 早退
-				if (time1 > time2 - 7000 && time1 < time2) {
-					attendduty.setRemark("早退");
-				} else if (time1 > time2 && time1 < time2 + 50000) {
-
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("2");
-				adm.insertSelective(attendduty);
-				break;
-			case 2:
-				break;
-
-			}
+		if (intduty - 10000 > intcurrent || intduty + 10000 < intcurrent) {
+			throw new Exception("打卡时间异常");
 		}
-		// 两头班
-		else {
-			Attendconfig attendconfig = acm.selectByPrimaryKey(userattendList.get(0).getDutytype());
-			int size = myList.size();
-			System.out.println("获取实际打卡次数" + size);
-			switch (size) {
-			case 0:
-				System.out.println("两头班的case0，也就是第一头上班打卡");
-				// 获取对应的排班表
-				String sdfFormat = hour.format(currentDate);
-				String format = sdfFormat.replace(":", "");
-				int time1 = Integer.parseInt(format);
-				String dutytime1 = attendconfig.getDutytime1().replace(":", "");
-				int time2 = Integer.parseInt(dutytime1);
-				Attendduty attendduty = new Attendduty();
-				// 没迟到
-				if (time1 < time2 && time1 > time2 - 10000) {
-
-				}
-				// 迟到的情况
-				else if (time1 > time2 && time1 < time2 + 10000) {
-					attendduty.setRemark("迟到");
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("1");
-				adm.insertSelective(attendduty);
-				break;
-			case 1:
-				System.out.println("两头班的case1，也就是第一头下班打卡");
-				// 获取对应的排班表
-				sdfFormat = hour.format(currentDate);
-				format = sdfFormat.replace(":", "");
-				time1 = Integer.parseInt(format);
-				String dutytime2 = attendconfig.getDutytime2().replace(":", "");
-				time2 = Integer.parseInt(dutytime2);
-				attendduty = new Attendduty();
-				// 下班
-				// 早退
-
-				System.out.println(time2);
-				System.out.println(time1);
-				// 分钟是60进制,但是数值是十进制
-				if (time1 > time2 - 7000 && time1 < time2) {
-					attendduty.setRemark("早退");
-				} else if (time1 > time2 && time1 < time2 + 3000) {
-
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("2");
-				adm.insertSelective(attendduty);
-				break;
-			case 2:
-				System.out.println("两头班的case2，也就是第二头上班打卡");
-				// 获取对应的排班表
-				sdfFormat = hour.format(currentDate);
-				format = sdfFormat.replace(":", "");
-				time1 = Integer.parseInt(format);
-				String dutytime3 = attendconfig.getDutytime3().replace(":", "");
-				time2 = Integer.parseInt(dutytime3);
-				attendduty = new Attendduty();
-				// 没迟到
-				if (time1 < time2 && time1 > time2 - 7000) {
-
-				}
-				// 迟到的情况
-				else if (time1 > time2 && time1 < time2 + 3000) {
-					attendduty.setRemark("迟到");
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("3");
-				adm.insertSelective(attendduty);
-				break;
-			case 3:
-				System.out.println("两头班的case3，也就是第二头下班打卡");
-				// 获取对应的排班表
-				sdfFormat = hour.format(currentDate);
-				format = sdfFormat.replace(":", "");
-				time1 = Integer.parseInt(format);
-				String dutytime4 = attendconfig.getDutytime4().replace(":", "");
-				time2 = Integer.parseInt(dutytime4);
-				attendduty = new Attendduty();
-				// 下班
-				if (time1 > time2 - 3000 && time1 < time2) {
-					attendduty.setRemark("早退");
-				} else if (time1 > time2 && time1 < time2 + 17000) {
-				}
-				// 非正常时间打卡
-				else {
-					System.out.println("非正常时间打卡");
-					throw new Exception("非正常时间打卡");
-				}
-				// 插入数据!
-
-				attendduty.setDutytype(userattendList.get(0).getDutytype());
-				attendduty.setRegistertime(currentDate);
-				attendduty.setUserid(user.getUserid());
-				attendduty.setRegistertype("4");
-				adm.insertSelective(attendduty);
-				break;
-			case 4:
-				System.out.println("两头班的case4，也就是说都打卡完了");
-				return;
-			default:
-				break;
-			}
-		}
+		attendduty.setDutytype(userattend);
+		attendduty.setRegistertype(type);
+		attendduty.setRegistertime(currentDate);
+		attendduty.setUserid(user.getUserid());
+		adm.insertSelective(attendduty);
 	}
 
 	@Override
@@ -392,7 +181,7 @@ public class AttendServiceImpl implements AttendService {
 		Criteria userAttendCriteria = userAttendExample.createCriteria();
 		userAttendCriteria.andUseridEqualTo(user.getUserid());
 
-		// 拿到了dutytypeid去拿config
+		// 拿到了dutytypeid去拿排版信息
 		List<UserAttend> ualist = uam.selectByExample(userAttendExample);
 		Attendconfig config = null;
 		if (ualist == null || ualist.size() <= 0) {
@@ -401,7 +190,6 @@ public class AttendServiceImpl implements AttendService {
 		}
 		System.out.println(ualist);
 		config = acm.selectByPrimaryKey(ualist.get(0).getDutytype());
-
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Calendar cal_1 = Calendar.getInstance();// 获取当前日期
 		cal_1.add(Calendar.MONTH, 0);
@@ -422,12 +210,14 @@ public class AttendServiceImpl implements AttendService {
 		String[] split = config.getGeneral().split(",");
 
 		// 本月第一天，当时获取一个月所有的天就是拿不到第一天啊啊啊啊啊啊
+		//去除休息天
 		if (calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[0]) + 1
 				&& calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[1]) + 1) {
 			AttendconfigVo attendconfigVo = new AttendconfigVo(config);
 			attendconfigVo.setDate(sdf.format(calBegin.getTime()));
 			list.add(attendconfigVo);
 		} else {
+			//第一天
 			AttendconfigVo attendconfigVo = new AttendconfigVo();
 			attendconfigVo.setDate(sdf.format(calBegin.getTime()));
 			attendconfigVo.setDutytype(config.getDutytype());
@@ -441,6 +231,7 @@ public class AttendServiceImpl implements AttendService {
 
 		while (cale.getTime().after(calBegin.getTime())) {
 			// 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+			//去除休息天
 			calBegin.add(Calendar.DAY_OF_MONTH, 1);
 			if (calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[0]) + 1
 					&& calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[1]) + 1) {

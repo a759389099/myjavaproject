@@ -50,9 +50,11 @@ public class AttendController {
 	@ResponseBody
 	public String sign(HttpSession session,HttpServletRequest request){
 		try {
-			String type = request.getParameter("type");
-			//穿了用户id和type进来
-			as.sign(session,type);
+			//打卡类型
+			String registerType = request.getParameter("type");
+			System.out.println("类型"+registerType);
+			//传了用户id和type进来
+			as.sign(session,registerType);
 		} catch (Exception e) {
 			String json = new Gson().toJson(e.getMessage());
 			return json;

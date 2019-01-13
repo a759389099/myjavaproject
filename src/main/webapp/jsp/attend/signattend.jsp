@@ -31,30 +31,27 @@
 
 
 <script type="text/javascript">
-$(document).ready(function(){
-	$("#daka").click(function() {
-		  $.ajax({
-			type:"post",
-			data: {"type": $(this).prev().val()},
-		   dataType:"json",
-		   url: "${pageContext.request.contextPath}/Attend/sign.action",
-		   success: function(data) {
-				alert(data);
-				window.location.href = "${pageContext.request.contextPath}/Attend/list.action";
-			}
-		 });  
-	})
-});
+	$(document).ready(function() {
+		$("#daka").click(function() {
+			$.ajax({
+				type : "post",
+				data : {"type" : $(this).prev().val()},
+				dataType : "json",
+				url : "${pageContext.request.contextPath}/Attend/sign.action",
+				success : function(data) {
+						alert(data);
+						window.location.href = "${pageContext.request.contextPath}/Attend/list.action";
+										}
+					});
+						})
+					});
 </script>
 <style type="text/css">
 </style>
 </head>
 
 <body>
-
 	<div style="border: 15px solid white">
-
-
 		<div class="table-responsive">
 			<table
 				class="table table-condensed table-striped table-bordered table-hover">
@@ -82,12 +79,15 @@ $(document).ready(function(){
 						<td>${uavo.dutytype.dutytime1}</td>
 						<td>08:00:00</td>
 						<td>10:00:00</td>
+						<!-- 格式化时间 -->
 						<td><fmt:formatDate
 								value="${uavo.attenddutyList[0].registertime}"
 								pattern="yyyy-MM-dd HH:mm:ss" /></td>
 						<td>${uavo.attenddutyList[0].remark}</td>
+						<!-- 决定这一行是否有打卡按钮，根据list的size判断(数据库有几条记录) -->
 						<td><c:if
 								test="${empty uavo.attenddutyList[0].registertime && fn:length(uavo.attenddutyList)==0}">
+								<!-- 打卡按钮会携带这个参数带到控制层 -->
 								<input type="hidden" name="type" value="1" />
 								<input type="button" id="daka" value="打卡" />
 							</c:if></td>
@@ -97,9 +97,9 @@ $(document).ready(function(){
 						<td>${uavo.dutytype.dutyname}</td>
 						<td>下班</td>
 						<td>${uavo.dutytype.dutytime2}</td>
-						<td>17:00:00</td>
+						<td>16:30:00</td>
 
-						<td>22:30:00</td>
+						<td>18:30:00</td>
 						<td><fmt:formatDate
 								value="${uavo.attenddutyList[1].registertime}"
 								pattern="yyyy-MM-dd HH:mm:ss" /></td>
@@ -124,6 +124,7 @@ $(document).ready(function(){
 						<td><fmt:formatDate
 								value="${uavo.attenddutyList[0].registertime}"
 								pattern="yyyy-MM-dd HH:mm:ss" /></td>
+						<td>${uavo.attenddutyList[0].remark}</td>
 						<td><c:if
 								test="${empty uavo.attenddutyList[0].registertime && fn:length(uavo.attenddutyList)==0}">
 								<input type="hidden" name="type" value="1" />
@@ -133,8 +134,8 @@ $(document).ready(function(){
 						<td>${uavo.dutytype.dutyname}</td>
 						<td>下班</td>
 						<td>${uavo.dutytype.dutytime2}</td>
-						<td>11:30:00</td>
-						<td>12:30:00</td>
+						<td>11:00:00</td>
+						<td>13:00:00</td>
 						<td><fmt:formatDate
 								value="${uavo.attenddutyList[1].registertime}"
 								pattern="yyyy-MM-dd HH:mm:ss" /></td>
@@ -149,9 +150,9 @@ $(document).ready(function(){
 						<td>${uavo.dutytype.dutyname}</td>
 						<td>上班</td>
 						<td>${uavo.dutytype.dutytime3}</td>
-						<td>17:00:00</td>
+						<td>16:30:00</td>
 
-						<td>18:00:00</td>
+						<td>18:30:00</td>
 						<td><fmt:formatDate
 								value="${uavo.attenddutyList[2].registertime}"
 								pattern="yyyy-MM-dd HH:mm:ss" /></td>
@@ -178,8 +179,6 @@ $(document).ready(function(){
 								<input type="hidden" name="type" value="4" />
 								<input type="button" id="daka" value="打卡" />
 							</c:if></td>
-
-
 
 					</tr>
 				</c:if>
