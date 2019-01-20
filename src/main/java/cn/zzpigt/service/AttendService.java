@@ -17,8 +17,8 @@ public interface AttendService {
 
 	void sign(HttpSession session, String type) throws Exception;
 
-	List<AttendconfigVo> getAttendConfig(HttpSession session);
+	List<AttendconfigVo> getAttendConfig(HttpSession session) throws Exception;
 
-	List<UserAttendCountVo> getcount(User user, String date);
+	List<UserAttendCountVo> getcount(User user, String date) throws Exception;
 
 }

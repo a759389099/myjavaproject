@@ -32,29 +32,35 @@ public class AttendController {
 	@RequestMapping("/count.action")
 	public String count(String date, HttpSession session, Model model) {
 		User user = (User) session.getAttribute("user");
-		List<UserAttendCountVo> list = as.getcount(user, date);
-		model.addAttribute("list", list);
-		model.addAttribute("date", date);
-		return "/jsp/attend/count.jsp";
+		List<UserAttendCountVo> list;
+		try {
+			list = as.getcount(user, date);
+			model.addAttribute("list", list);
+			model.addAttribute("date", date);
+			return "/jsp/attend/count.jsp";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	@RequestMapping("/list.action")
 	public String list(HttpSession session, Model model) {
 		UserAttendVo uavo = as.getAttend(session);
-		System.out.println(uavo);
 		model.addAttribute("uavo", uavo);
 		return "/jsp/attend/signattend.jsp";
 	}
 
-	@RequestMapping(value="/sign.action", produces="application/json; charset=utf-8" )
+	@RequestMapping(value = "/sign.action", produces = "application/json; charset=utf-8")
 	@ResponseBody
-	public String sign(HttpSession session,HttpServletRequest request){
+	public String sign(HttpSession session, HttpServletRequest request) {
 		try {
-			//打卡类型
+			// 打卡类型
 			String registerType = request.getParameter("type");
-			System.out.println("类型"+registerType);
-			//传了用户id和type进来
-			as.sign(session,registerType);
+			System.out.println("类型" + registerType);
+			// 传了用户id和type进来
+			as.sign(session, registerType);
 		} catch (Exception e) {
 			String json = new Gson().toJson(e.getMessage());
 			return json;
@@ -65,9 +71,16 @@ public class AttendController {
 
 	@RequestMapping("/myAttend.action")
 	public String myattend(Model model, HttpSession session) {
-		List<AttendconfigVo> config = as.getAttendConfig(session);
-		model.addAttribute("config", config);
-		return "/jsp/attend/myAttend.jsp";
+		List<AttendconfigVo> config;
+		try {
+			config = as.getAttendConfig(session);
+			model.addAttribute("config", config);
+			return "/jsp/attend/myAttend.jsp";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
 	}
 
 }

@@ -62,20 +62,20 @@ public class AttendServiceImpl implements AttendService {
 		UserAttendExample userAttendExample = new UserAttendExample();
 		Criteria uaCriteria = userAttendExample.createCriteria();
 		uaCriteria.andUseridEqualTo(user.getUserid());
-		//获取用户排版表
+		// 获取用户排版表
 		List<UserAttend> userattendList = uam.selectByExample(userAttendExample);
 		if (userattendList == null || userattendList.size() == 0) {
 			return null;
 		}
 		UserAttend userAttend = userattendList.get(0);
-		//获取该用户的具体班次信息
+		// 获取该用户的具体班次信息
 		Attendconfig attendConfig = acm.selectByPrimaryKey(userAttend.getDutytype());
 		userAttendVo.setDutytype(attendConfig);
 
 		AttenddutyExample attenddutyExample = new AttenddutyExample();
 		cn.zzpigt.bean.AttenddutyExample.Criteria adCriteria = attenddutyExample.createCriteria();
 		adCriteria.andUseridEqualTo(user.getUserid());
-		//获取用户所有的打卡记录
+		// 获取用户所有的打卡记录
 		List<Attendduty> attenddutyList = adm.selectByExample(attenddutyExample);
 		// 获取今天的打卡记录
 		List<Attendduty> myList = new ArrayList<>();
@@ -136,7 +136,7 @@ public class AttendServiceImpl implements AttendService {
 				throw new Exception("本日为假期！");
 			}
 		}
-		//反射调用set方法 datetime1，2，3，4
+		// 反射调用set方法 datetime1，2，3，4
 		Method method = attendconfig.getClass().getDeclaredMethod("getDutytime" + type);
 		String dutyTime = (String) method.invoke(attendconfig);
 		Attendduty attendduty = new Attendduty();
@@ -210,14 +210,14 @@ public class AttendServiceImpl implements AttendService {
 		String[] split = config.getGeneral().split(",");
 
 		// 本月第一天，当时获取一个月所有的天就是拿不到第一天啊啊啊啊啊啊
-		//去除休息天
+		// 去除休息天
 		if (calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[0]) + 1
 				&& calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[1]) + 1) {
 			AttendconfigVo attendconfigVo = new AttendconfigVo(config);
 			attendconfigVo.setDate(sdf.format(calBegin.getTime()));
 			list.add(attendconfigVo);
 		} else {
-			//第一天
+			// 第一天
 			AttendconfigVo attendconfigVo = new AttendconfigVo();
 			attendconfigVo.setDate(sdf.format(calBegin.getTime()));
 			attendconfigVo.setDutytype(config.getDutytype());
@@ -231,7 +231,7 @@ public class AttendServiceImpl implements AttendService {
 
 		while (cale.getTime().after(calBegin.getTime())) {
 			// 根据日历的规则，为给定的日历字段添加或减去指定的时间量
-			//去除休息天
+			// 去除休息天
 			calBegin.add(Calendar.DAY_OF_MONTH, 1);
 			if (calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[0]) + 1
 					&& calBegin.get(Calendar.DAY_OF_WEEK) != Integer.parseInt(split[1]) + 1) {
@@ -260,7 +260,6 @@ public class AttendServiceImpl implements AttendService {
 	public List<User> getFollowers(User user) {
 		List<User> ulist = new ArrayList<>();
 		ulist.add(user);
-
 		UserExample uExample = new UserExample();
 		cn.zzpigt.bean.UserExample.Criteria userCriteria = uExample.createCriteria();
 		userCriteria.andLeaderidEqualTo(user.getUserid());
@@ -271,53 +270,41 @@ public class AttendServiceImpl implements AttendService {
 				ulist.addAll(followers);
 			}
 		}
-
 		return ulist;
 	}
 
 	@Override
-	public List<UserAttendCountVo> getcount(User user, String date) {
+	public List<UserAttendCountVo> getcount(User user, String date) throws Exception {
 
 		SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd");
 		// 没有筛选项默认为本月
 		if (date == null) {
 			date = dayFormat.format(new Date());
 		}
+		Date parse = dayFormat.parse(date);
 		// 获取本月工作日
-		int year = Integer.parseInt(date.substring(0, 4));
-		int month = Integer.parseInt(date.substring(5, 7));
 		Calendar c = Calendar.getInstance();
-		c.set(Calendar.YEAR, year);
-		// 月份是从0开始计算，所以需要减1
-		c.set(Calendar.MONTH, month - 1);
-		// 当月最后一天的日期
+		c.setTime(parse);
 		int max = c.getActualMaximum(Calendar.DAY_OF_MONTH);
 		// 开始日期为1号
-		int start = 1;
-		// 计数
 		int maxDate = 0;
-		while (start <= max) {
+		for (int start = 1; start <= max; start++) {
+			// 把这一天设置进日历
 			c.set(Calendar.DAY_OF_MONTH, start);
+			// 获取这一天是周几
 			int week = c.get(Calendar.DAY_OF_WEEK);
 			// 不是周六和周日的都认为是工作日
 			if (week != Calendar.SUNDAY && week != Calendar.SATURDAY) {
 				maxDate++;
 			}
-			start++;
 		}
-
+		// 递归获取下属
 		List<User> userList = getFollowers(user);
-		for (User user2 : userList) {
-			System.out.println(user2.getNickname());
-		}
-		List<UserAttendCountVo> uacvl = new ArrayList<>();
+		// po转vo准备
+		List<UserAttendCountVo> uacvList = new ArrayList<>();
 		// 遍历每一个用户
 		for (User user2 : userList) {
-			UserAttendCountVo uacv = new UserAttendCountVo(user2);
-			UserAttendExample userAttendExample = new UserAttendExample();
-			Criteria userAttendCriteria = userAttendExample.createCriteria();
-			userAttendCriteria.andUseridEqualTo(user2.getUserid());
-			List<UserAttend> userAttendList = uam.selectByExample(userAttendExample);
+
 			// 迟到
 			AttenddutyExample lateExample = new AttenddutyExample();
 			cn.zzpigt.bean.AttenddutyExample.Criteria lateCriteria = lateExample.createCriteria();
@@ -348,7 +335,7 @@ public class AttendServiceImpl implements AttendService {
 			endDate.set(Calendar.HOUR_OF_DAY, 0);
 			endDate.set(Calendar.MINUTE, 0);
 			endDate.set(Calendar.SECOND, 0);
-			// 本月的天数
+			// 本月的天数,利用sql语句between条件，获取2个时间段之间是否打卡了
 			for (int i = 1; i <= startDate.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
 				startDate.set(Calendar.DAY_OF_MONTH, i);
 				Date time1 = startDate.getTime();
@@ -364,8 +351,16 @@ public class AttendServiceImpl implements AttendService {
 					attendday++;
 				}
 			}
+			//上班未登记天数
 			int noCome = 0;
+			//下班未登记天数
 			int noBack = 0;
+			UserAttendCountVo uacv = new UserAttendCountVo(user2);
+			UserAttendExample userAttendExample = new UserAttendExample();
+			Criteria userAttendCriteria = userAttendExample.createCriteria();
+			userAttendCriteria.andUseridEqualTo(user2.getUserid());
+			// po转vo，把user对象放进
+			List<UserAttend> userAttendList = uam.selectByExample(userAttendExample);
 			// 有打卡,计算未打卡次数
 			if (attendday > 0) {
 				// 行政班
@@ -384,7 +379,6 @@ public class AttendServiceImpl implements AttendService {
 					noBack = attendday * 2 - m2 - m4;
 				}
 			}
-			// 行政班
 			uacv.setComesign(noCome);
 			uacv.setBacksign(noBack);
 			// 应全勤,实际,旷工,迟到,早退
@@ -393,9 +387,9 @@ public class AttendServiceImpl implements AttendService {
 			uacv.setNevercount(maxDate - attendday);
 			uacv.setLatecount(late);
 			uacv.setEarlycount(early);
-			uacvl.add(uacv);
+			uacvList.add(uacv);
 		}
-		return uacvl;
+		return uacvList;
 	}
 
 	private int getSignCount(User user2, String date, String state) {
